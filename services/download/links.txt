@@ -1,8 +1,10 @@
-https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.ckpt
+https://huggingface.co/benjamin-paine/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.ckpt
   out=Stable-diffusion/v1-5-pruned-emaonly.ckpt
+https://huggingface.co/RunDiffusion/Juggernaut-XL-v9/resolve/main/Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors?download=true
+  out=Stable-diffusion/Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors
 https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.ckpt
   out=VAE/vae-ft-mse-840000-ema-pruned.ckpt
-https://huggingface.co/runwayml/stable-diffusion-inpainting/resolve/main/sd-v1-5-inpainting.ckpt
+https://huggingface.co/benjamin-paine/stable-diffusion-v1-5-inpainting/resolve/main/sd-v1-5-inpainting.ckpt
   out=Stable-diffusion/sd-v1-5-inpainting.ckpt
 https://github.com/TencentARC/GFPGAN/releases/download/v1.3.4/GFPGANv1.4.pth
   out=GFPGAN/GFPGANv1.4.pth
