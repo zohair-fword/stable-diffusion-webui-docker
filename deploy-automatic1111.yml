@@ -1,0 +1,82 @@
+name: Deploy Automatic1111
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance_ip:
+        description: "Instance Public IP"
+        required: true
+      user:
+        description: "SSH Username"
+        required: true
+      ssh_key:
+        description: "SSH Private Key"
+        required: true
+      environment:
+        description: "Deployment Environment (staging/production)"
+        required: true
+        default: "staging"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the Repository
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # Step 2: Install Required Tools
+    - name: Install SSH Client
+      run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+    # Step 3: Set Up SSH Key
+    - name: Configure SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ github.event.inputs.ssh_key }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    # Step 4: Deploy Automatic1111
+    - name: Deploy Automatic1111
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ github.event.inputs.user }}@${{ github.event.inputs.instance_ip }} << 'EOF'
+          set -e
+          echo "Installing Docker and Docker Compose..."
+          sudo apt-get update
+          sudo apt-get install -y docker.io docker-compose-plugin
+
+          echo "Cloning Stable Diffusion repository..."
+          git clone https://github.com/theffword/thefgenai.git ~/automatic1111
+          cd ~/automatic1111
+
+          echo "Running download step..."
+          docker compose --profile download up --build -d
+          echo "Download step completed."
+
+          echo "Running Automatic1111 service..."
+          docker compose --profile auto up --build -d
+          echo "Automatic1111 is now running at http://localhost:7860"
+        EOF
+
+    # Step 5: Verify Deployment
+    - name: Verify Deployment
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ github.event.inputs.user }}@${{ github.event.inputs.instance_ip }} << 'EOF'
+          if curl -s --head http://localhost:7860 | grep "200 OK" > /dev/null; then
+            echo "Deployment successful on ${{ github.event.inputs.environment }} environment!"
+          else
+            echo "Deployment failed."
+            exit 1
+          fi
+        EOF
+
+  promote-to-production:
+    needs: deploy
+    if: github.event.inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Promote to Production
+      run: |
+        echo "Staging deployment successful. Ready to deploy to production."
